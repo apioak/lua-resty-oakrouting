@@ -20,6 +20,6 @@ dependencies = {
 build = {
     type = 'builtin',
     modules = {
-        ['resty.jwt'] = 'lib/resty/oakrouter.lua',
+        ['resty.oakrouting'] = 'lib/resty/oakrouting.lua',
     }
 }
