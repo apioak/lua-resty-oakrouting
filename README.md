@@ -90,8 +90,7 @@ location / {
         succeed = oak:dispatch("/test/parameter/apioak", "GET")
         if not succeed then
             ngx.say("Matched URI: /test/parameter/apioak FAIL")
-        end        
-        
+        end     
     }
 }
 ```
