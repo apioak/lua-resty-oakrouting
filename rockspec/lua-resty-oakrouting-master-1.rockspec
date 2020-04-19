@@ -7,8 +7,8 @@ source = {
 }
 
 description = {
-    summary = 'Subtree split of the APIOAK Routing component.',
-    homepage = 'https://github.com/cdbattags/lua-resty-jwt',
+    summary = 'The APIOAK Routing component',
+    homepage = 'https://github.com/apioak/lua-resty-oakrouting',
     license = 'Apache License 2.0',
     maintainer = "Janko <shuaijinchao@gmail.com>"
 }
