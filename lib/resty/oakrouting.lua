@@ -6,6 +6,7 @@ local str_upper    = string.upper
 local tab_insert   = table.insert
 local ngx_re_gsub  = ngx.re.gsub
 local ngx_re_match = ngx.re.match
+local ngx_re_find  = ngx.re.find
 
 
 local ok, new_tab = pcall(require, "table.new")
@@ -32,9 +33,16 @@ local _M = { _VERSION = '0.1.0' }
 local mt = { __index = _M }
 
 
-local function push_router(self, path, method, handler)
+local function push_router(self, path, method, handler, priority)
     if type(path) ~= "string" then
         error("invalid argument path", 2)
+    end
+
+
+    if priority and type(priority) ~= "number" then
+        error("missing argument priority", 2)
+    else
+        priority = 1
     end
 
 
@@ -67,10 +75,17 @@ local function push_router(self, path, method, handler)
     end, "i")
 
 
+    local wildcard_from = ngx_re_find(regexp, "\\*", "jo")
+    if wildcard_from then
+        regexp = ngx_re_gsub(regexp, "\\*", "([a-zA-Z0-9-_\\/]*)", "jo")
+    end
+
+
     tab_insert(self.cached_data[method], {
         path = path,
         regexp = "^" .. regexp .. "$",
         handler = handler,
+        priority = priority,
         variables = variables,
     })
 end
@@ -130,20 +145,27 @@ function _M.dispatch(self, path, method, ...)
 
     local params = new_tab(0, 1)
     local handler
+    local current_router
+
 
     local routers = self.cached_data[method] or new_tab(1, 0)
     for i = 1, #routers do
         local router = routers[i]
         local matched = ngx_re_match(path, router.regexp, "jo")
         if matched then
-            handler = router.handler
-            if #router.variables > 0 then
-                for _, variable in ipairs(router.variables) do
-                    params[variable] = matched[variable]
-                end
+            router.matched = matched
+            if not current_router or router.priority > current_router.priority then
+                current_router = router
+                handler = router.handler
             end
-            handler = router.handler
-            break
+        end
+    end
+
+
+    if current_router and #current_router.variables > 0 then
+        local router_matched = current_router.matched
+        for _, variable in ipairs(current_router.variables) do
+            params[variable] = router_matched[variable]
         end
     end
 
@@ -172,7 +194,7 @@ function _M.new(routers)
 
     for i = 1, router_len do
         local router = routers[i]
-        push_router(self, router.path, router.method, router.handler)
+        push_router(self, router.path, router.method, router.handler, router.priority)
     end
 
 
