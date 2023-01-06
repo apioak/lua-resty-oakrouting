@@ -1,6 +1,7 @@
 local type         = type
 local ipairs       = ipairs
 local str_sub      = string.sub
+local str_gsub     = string.gsub
 local str_len      = string.len
 local str_upper    = string.upper
 local tab_insert   = table.insert
@@ -51,19 +52,50 @@ local function push_router(self, path, method, handler, priority)
     end
 
 
-    if not method or type(path) ~= "string" then
+    if not method then
         error("missing argument method", 2)
     end
 
 
-    method = str_upper(method)
-    if not _METHODS[method] then
-        error("method invalid", 2)
+    local method_type = type(method)
+    if method_type ~= "string" and method_type ~= "table" then
+        error("missing argument method", 2)
     end
 
 
-    if not self.cached_data[method] then
-        self.cached_data[method] = new_tab(10, 0)
+    local method_table = {}
+    if method_type == "string" then
+        str_gsub(method, "[^,]+", function(method_str)
+            if #method_str > 0 then
+                tab_insert(method_table, str_upper(method_str))
+            end
+        end)
+    elseif method_type == "table" then
+        for i = 1, #method do
+            if #method[i] > 0 then
+                tab_insert(method_table, str_upper(method[i]))
+            end
+        end
+    end
+
+
+    local method_table_len = #method_table
+    if method_table_len == 0 then
+        error("missing argument method", 2)
+    end
+
+
+    for i = 1, method_table_len do
+        if not _METHODS[method_table[i]] then
+            error("method invalid", 2)
+        end
+    end
+
+
+    for i = 1, method_table_len do
+        if not self.cached_data[method_table[i]] then
+            self.cached_data[method_table[i]] = new_tab(10, 0)
+        end
     end
 
 
@@ -81,13 +113,15 @@ local function push_router(self, path, method, handler, priority)
     end
 
 
-    tab_insert(self.cached_data[method], {
-        path = path,
-        regexp = "^" .. regexp .. "$",
-        handler = handler,
-        priority = priority,
-        variables = variables,
-    })
+    for i = 1, method_table_len do
+        tab_insert(self.cached_data[method_table[i]], {
+            path = path,
+            regexp = "^" .. regexp .. "$",
+            handler = handler,
+            priority = priority,
+            variables = variables,
+        })
+    end
 end
 
 
