@@ -6,12 +6,12 @@ local match_path
 local routers = {}
 for i = 1, match_count do
     table_insert(routers, {
-        path = "/bench/" .. ngx.md5(i) .. "/{name}",
+        path = "/bench/" .. ngx.md5(i) .. "/{name}/*",
         method = "GET",
         handler = function() end
     })
     if i == match_count then
-        match_path = "/bench/" .. ngx.md5(i) .. "/apioak"
+        match_path = "/bench/" .. ngx.md5(i) .. "/apioak/test"
     end
 end
 

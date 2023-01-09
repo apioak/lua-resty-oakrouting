@@ -1,4 +1,4 @@
-local oakrouting   = require("resty.oakrouting")
+local oakrouting   = require("lib.resty.oakrouting")
 local match_count  = 100000
 local table_insert = table.insert
 local match_router

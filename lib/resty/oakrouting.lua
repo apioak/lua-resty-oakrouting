@@ -109,7 +109,7 @@ local function push_router(self, path, method, handler, priority)
 
     local wildcard_from = ngx_re_find(regexp, "\\*", "jo")
     if wildcard_from then
-        regexp = ngx_re_gsub(regexp, "\\*", "([a-zA-Z0-9-_\\/]*)", "jo")
+        regexp = ngx_re_gsub(regexp, "\\*", "([a-zA-Z0-9-_\\/]+)", "jo")
     end
 
 
