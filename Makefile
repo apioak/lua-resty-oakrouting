@@ -5,3 +5,5 @@ bench:
 	@echo ""
 	resty -I lib benchmark/match-static.lua
 	@echo ""
+	resty -I lib benchmark/match-wildcard.lua
+	@echo ""
