@@ -31,35 +31,48 @@ location / {
                 method = "GET",
                 handler = function()
                     ngx.say("hello, GET")
-                end
+                end,
+                priority = 1,
             },
             {
-                path = "/test/post",
-                method = "POST",
+                path = "/test/get/post",
+                method = "GET,POST",
                 handler = function()
                     ngx.say("hello, POST")
-                end
+                end,
+                priority = 1,
             },
             {
                 path = "/test/put",
-                method = "PUT",
+                method = { "PUT" },
                 handler = function()
                     ngx.say("hello, PUT")
-                end
+                end,
+                priority = 1,
             },
             {
-                path = "/test/delete",
-                method = "DELETE",
+                path = "/test/put/delete",
+                method = { "PUT", "DELETE" },
                 handler = function()
                     ngx.say("hello, DELETE")
-                end
+                end,
+                priority = 1,
             },
             {
                 path = "/test/parameter/{gateway}",
-                method = "DELETE",
+                method = "GET",
                 handler = function(params)
                     ngx.say("hello, " .. params.gateway)
-                end
+                end,
+                priority = 1,
+            },
+            {
+              path = "/test/parameter-wildcard/{gateway}/*",
+              method = { "GET", "DELETE" },
+              handler = function(params)
+                ngx.say("hello, " .. params.gateway)
+              end,
+              priority = 1,
             },
         })
         
@@ -90,7 +103,12 @@ location / {
         succeed = oak:dispatch("/test/parameter/apioak", "GET")
         if not succeed then
             ngx.say("Matched URI: /test/parameter/apioak FAIL")
-        end     
+        end
+
+        succeed = oak:dispatch("/test/parameter-wildcard/apioak/test-wildcard", "GET")
+        if not succeed then
+          ngx.say("Matched URI: /test/parameter-wildcard/apioak/test-wildcard FAIL")
+        end
     }
 }
 ```
